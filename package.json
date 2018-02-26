@@ -5,6 +5,7 @@
   },
   "license": "Apache-2.0",
   "scripts": {
+    "build": "gatsby build",
     "postinstall": "patch -p0 < patch.diff"
   }
 }
