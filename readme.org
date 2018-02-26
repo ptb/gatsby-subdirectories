@@ -1,0 +1,5 @@
+* Gatsby Subdirectories
+
+This is my answer to how to build gatsby assets into subdirectories under public: [[https://github.com/gatsbyjs/gatsby/issues/3760][gatsbyjs/gatsby#3760]]
+
+It's just my personal preferences how I like to structure my files and post-install patch the files under node_modules.
