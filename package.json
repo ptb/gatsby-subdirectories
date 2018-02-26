@@ -1,0 +1,10 @@
+{
+  "author": "Peter T Bosse II <ptb@ioutime.com> (http://ptb2.me/)",
+  "devDependencies": {
+    "gatsby": "latest"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "postinstall": "patch -p0 < patch.diff"
+  }
+}

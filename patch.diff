@@ -1,0 +1,200 @@
+--- node_modules/gatsby/cache-dir/default-html.js
++++ node_modules/gatsby/cache-dir/default-html.js
+@@ -3,7 +3,7 @@
+ let stylesStr
+ if (process.env.NODE_ENV === `production`) {
+   try {
+-    stylesStr = require(`!raw-loader!../public/styles.css`)
++    stylesStr = require(`!raw-loader!../public/css/styles.css`)
+   } catch (e) {
+     console.log(e)
+   }
+--- node_modules/gatsby/cache-dir/develop-static-entry.js
++++ node_modules/gatsby/cache-dir/develop-static-entry.js
+@@ -67,7 +67,7 @@
+     ]),
+     preBodyComponents,
+     postBodyComponents: postBodyComponents.concat([
+-      <script key={`commons`} src="/commons.js" />,
++      <script key={`commons`} src="/js/b-commons.js" />,
+     ]),
+   })
+   htmlStr = renderToStaticMarkup(htmlElement)
+--- node_modules/gatsby/cache-dir/loader.js
++++ node_modules/gatsby/cache-dir/loader.js
+@@ -73,9 +73,9 @@
+   } else {
+     // Find resource
+     let resourceFunction
+-    if (resourceName.slice(0, 12) === `component---`) {
++    if (resourceName.slice(0, 7) === `js/c/c-`) {
+       resourceFunction = asyncRequires.components[resourceName]
+-    } else if (resourceName.slice(0, 9) === `layout---`) {
++    } else if (resourceName.slice(0, 7) === `js/l/l-`) {
+       resourceFunction = asyncRequires.layouts[resourceName]
+     } else {
+       resourceFunction = asyncRequires.json[resourceName]
+--- node_modules/gatsby/cache-dir/root.js
++++ node_modules/gatsby/cache-dir/root.js
+@@ -14,7 +14,7 @@
+ // Report runtime errors
+ ErrorOverlay.startReportingRuntimeErrors({
+   onError: () => {},
+-  filename: `/commons.js`,
++  filename: `/js/b-commons.js`,
+ })
+ ErrorOverlay.setEditorHandler(errorLocation =>
+   window.fetch(
+--- node_modules/gatsby/cache-dir/static-entry.js
++++ node_modules/gatsby/cache-dir/static-entry.js
+@@ -26,7 +26,7 @@
+
+ const pathChunkName = path => {
+   const name = path === `/` ? `index` : kebabCase(path)
+-  return `path---${name}`
++  return `js/p/p-${name}`
+ }
+
+ const getPage = path => pages.find(page => page.path === path)
+@@ -147,8 +147,8 @@
+   // Create paths to scripts
+   const page = pages.find(page => page.path === locals.path)
+   const scripts = [
+-    `commons`,
+-    `app`,
++    `js/b-commons`,
++    `js/a-appmain`,
+     pathChunkName(locals.path),
+     page.componentChunkName,
+     page.layoutComponentChunkName,
+--- node_modules/gatsby/dist/commands/build-css.js
++++ node_modules/gatsby/dist/commands/build-css.js
+@@ -35,14 +35,14 @@
+
+                 // We don't want any javascript produced by this step in the process.
+                 try {
+-                  fs.unlinkSync(`${directory}/public/bundle-for-css.js`);
++                  fs.unlinkSync(`${directory}/public/css/bundle-for-css.js`);
+                 } catch (e) {}
+                 // ignore.
+
+
+                 // Ensure there's a styles.css file in public so tools that expect it
+                 // can find it.
+-                fs.ensureFile(`${directory}/public/styles.css`, function (err) {
++                fs.ensureFile(`${directory}/public/css/styles.css`, function (err) {
+                   resolve(err);
+                 });
+               });
+--- node_modules/gatsby/dist/redux/actions.js
++++ node_modules/gatsby/dist/redux/actions.js
+@@ -316,7 +316,7 @@
+   var id = layout.id || path.parse(layout.component).name;
+   // Add a "machine" id as a universal ID to differentiate layout from
+   // page components.
+-  var machineId = `layout---${id}`;
++  var machineId = `js/l/l-${id}`;
+   var componentWrapperPath = joinPath(store.getState().program.directory, `.cache`, `layouts`, `${id}.js`);
+
+   var internalLayout = {
+--- node_modules/gatsby/dist/utils/js-chunk-names.js
++++ node_modules/gatsby/dist/utils/js-chunk-names.js
+@@ -1,5 +1,11 @@
+ "use strict";
+
++var crypto = require("crypto");
++
++var shahex = function shahex(name) {
++  return crypto.createHash("sha").update(name).digest("hex").slice(0,8);
++}
++
+ var _lodash = require("lodash");
+
+ var _lodash2 = _interopRequireDefault(_lodash);
+@@ -13,7 +19,7 @@
+
+ var generatePathChunkName = function generatePathChunkName(path) {
+   var name = path === `/` ? `index` : _lodash2.default.kebabCase(path);
+-  return `path---${name}`;
++  return `js/p/p-${shahex(name)}`;
+ };
+
+ var generateComponentChunkName = function generateComponentChunkName(componentPath) {
+@@ -23,7 +29,7 @@
+     directory = program.directory;
+   }
+   var name = path.relative(directory, componentPath);
+-  return `component---${_lodash2.default.kebabCase(name)}`;
++  return `js/c/c-${shahex(_lodash2.default.kebabCase(name))}`;
+ };
+
+ exports.generatePathChunkName = generatePathChunkName;
+--- node_modules/gatsby/dist/utils/webpack.config.js
++++ node_modules/gatsby/dist/utils/webpack.config.js
+@@ -72,12 +72,12 @@
+ var HashedChunkIdsPlugin = require(`./hashed-chunk-ids-plugin`);
+
+ // Use separate extract-text-webpack-plugin instances for each stage per the docs
+-var extractDevelopHtml = new _extractTextWebpackPlugin2.default(`build-html-styles.css`);
+-var extractBuildHtml = new _extractTextWebpackPlugin2.default(`build-html-styles.css`, {
++var extractDevelopHtml = new _extractTextWebpackPlugin2.default(`css/styles-html.css`);
++var extractBuildHtml = new _extractTextWebpackPlugin2.default(`css/styles-html.css`, {
+   allChunks: true
+ });
+ var extractBuildCss = new _extractTextWebpackPlugin2.default(`styles.css`, { allChunks: true });
+-var extractBuildJavascript = new _extractTextWebpackPlugin2.default(`build-js-styles.css`, {
++var extractBuildJavascript = new _extractTextWebpackPlugin2.default(`css/styles-js.css`, {
+   allChunks: true
+ });
+
+@@ -341,8 +341,8 @@
+                     // Extract "commons" chunk from the app entry and all
+                     // page components.
+                     new _webpack2.default.optimize.CommonsChunkPlugin({
+-                      name: `commons`,
+-                      chunks: [`app`].concat(components),
++                      name: `js/b-commons`,
++                      chunks: [`js/a-appmain`].concat(components),
+                       // The more page components there are, the higher we raise the bar
+                       // for merging in page-specific JS libs into the commons chunk. The
+                       // two principles here is a) keep the TTI (time to interaction) as
+@@ -420,7 +420,7 @@
+               switch (stage) {
+                 case `develop`:
+                   return {
+-                    commons: [require.resolve(`react-hot-loader/patch`), `${require.resolve(`webpack-hot-middleware/client`)}?path=http://${program.host}:${webpackPort}/__webpack_hmr&reload=true&overlay=false`, directoryPath(`.cache/app`)]
++                    "js/b-commons": [require.resolve(`react-hot-loader/patch`), `${require.resolve(`webpack-hot-middleware/client`)}?path=http://${program.host}:${webpackPort}/__webpack_hmr&reload=true&overlay=false`, directoryPath(`.cache/app`)]
+                   };
+                 case `develop-html`:
+                   return {
+@@ -436,7 +436,7 @@
+                   };
+                 case `build-javascript`:
+                   return {
+-                    app: directoryPath(`.cache/production-app`)
++                    "js/a-appmain": directoryPath(`.cache/production-app`)
+                   };
+                 default:
+                   throw new Error(`The state requested ${stage} doesn't exist.`);
+@@ -458,9 +458,9 @@
+                   // Webpack will always generate a resultant javascript file.
+                   // But we don't want it for this step. Deleted by build-css.js.
+                   return {
+-                    path: directoryPath(`public`),
++                    path: directoryPath(`public/css`),
+                     filename: `bundle-for-css.js`,
+-                    publicPath: program.prefixPaths ? `${store.getState().config.pathPrefix}/` : `/`
++                    publicPath: program.prefixPaths ? `${store.getState().config.pathPrefix}/` : `/css/`
+                   };
+                 case `build-html`:
+                 case `develop-html`:
+--- node_modules/gatsby-1-config-css-modules/index.js
++++ node_modules/gatsby-1-config-css-modules/index.js
+@@ -1,6 +1,6 @@
+ "use strict";
+
+-var LOCAL_IDENT_NAME = `[path]---[name]---[local]---[hash:base64:5]`;
++var LOCAL_IDENT_NAME = `[sha256:hash:base52:6]`;
+ exports.LOCAL_IDENT_NAME = LOCAL_IDENT_NAME;
+
+ exports.cssModulesConfig = function (stage) {
