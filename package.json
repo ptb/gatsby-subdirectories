@@ -4,6 +4,7 @@
     "gatsby": "latest"
   },
   "license": "Apache-2.0",
+  "repository": "github:ptb/gatsby-subdirectories",
   "scripts": {
     "build": "gatsby build",
     "postinstall": "patch -p0 < patch.diff"

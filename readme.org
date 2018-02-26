@@ -8,6 +8,7 @@ To test:
 
 #+begin_src sh
 git clone https://github.com/ptb/gatsby-subdirectories.git
+cd gatsby-subdirectories
 npm install
 npm run build
 #+end_src
